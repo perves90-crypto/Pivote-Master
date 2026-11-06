@@ -12,7 +12,6 @@ jobs:
         with:
           node-version: 20
       - run: npm install
-      - run: npm install -D @vitejs/plugin-react
       - run: npm run build
       - run: npx cap add android
       - run: npx cap sync android
@@ -20,8 +19,12 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-      - uses: android-actions/setup-android@v3
-      - run: chmod +x android/gradlew && cd android && ./gradlew assembleDebug
+      - name: Install Android SDK packages
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+      - name: Build debug APK
+        run: chmod +x android/gradlew && cd android && ./gradlew assembleDebug
       - uses: actions/upload-artifact@v4
         with:
           name: Pivot-Master-debug-apk
